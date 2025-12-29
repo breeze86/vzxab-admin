@@ -1,0 +1,24 @@
+@config "../../tailwind.config.cjs";
+@import "tailwindcss";
+
+html,
+body {
+  max-width: 100vw;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
+body {
+  background: #ffffff;
+  color: #0a0a0a;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}

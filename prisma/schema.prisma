@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Review {
+  id        Int           @id @default(autoincrement())
+  name      String
+  email     String
+  rating    Int
+  content   String        @db.Text
+  createdAt DateTime      @default(now())
+  isDeleted Boolean       @default(false)
+  deletedAt DateTime?
+  replies   ReviewReply[]
+
+  @@index([isDeleted, createdAt])
+}
+
+model ReviewReply {
+  id        Int      @id @default(autoincrement())
+  reviewId  Int
+  adminName String
+  content   String   @db.Text
+  repliedAt DateTime @default(now())
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([reviewId])
+  @@index([reviewId, repliedAt])
+}
+
+model Admin {
+  id           Int            @id @default(autoincrement())
+  username     String         @unique
+  displayName  String
+  passwordHash String
+  isActive     Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  sessions     AdminSession[]
+
+  @@index([isActive])
+}
+
+model AdminSession {
+  id        Int      @id @default(autoincrement())
+  adminId   Int
+  token     String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([expiresAt])
+}
+
+model CustomerCooperation {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  subject   String
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+}

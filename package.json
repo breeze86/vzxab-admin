@@ -1,0 +1,43 @@
+{
+  "name": "vzxab-admin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "dotenv -e .env -- sh -c 'next dev -p $PORT'",
+    "build": "next build",
+    "start": "dotenv -e .env -- sh -c 'next start -p $PORT'",
+    "prisma:generate": "pnpm exec prisma generate",
+    "prisma:migrate": "pnpm exec prisma migrate dev",
+    "prisma:migrate:init": "pnpm exec prisma migrate dev --name init",
+    "prisma:deploy": "pnpm exec prisma migrate deploy",
+    "admin:create": "node scripts/create-admin.cjs",
+    "admin:reset-password": "node scripts/reset-admin-password.cjs",
+    "lint": "eslint",
+    "seed:reviews": "node scripts/seed-reviews.cjs",
+    "seed:contacts": "node scripts/seed-contacts.cjs"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.1",
+    "js-sha256": "^0.11.0",
+    "lucide-react": "^0.562.0",
+    "next": "16.1.1",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "recharts": "^3.6.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.23",
+    "dotenv-cli": "^11.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.1",
+    "postcss": "^8.5.6",
+    "prisma": "^6.19.1",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5"
+  }
+}
