@@ -67,4 +67,8 @@ model CustomerCooperation {
   subject   String
   message   String   @db.Text
   createdAt DateTime @default(now())
+  isDeleted Boolean  @default(false)
+  deletedAt DateTime?
+
+  @@index([isDeleted, createdAt])
 }

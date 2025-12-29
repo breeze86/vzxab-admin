@@ -16,6 +16,7 @@ export async function GET(request: Request) {
     const subject = (searchParams.get("subject") || "").trim();
 
     const where = {
+      isDeleted: false,
       ...(query
         ? {
             OR: [
@@ -29,7 +30,7 @@ export async function GET(request: Request) {
       ...(subject ? { subject } : {}),
     };
 
-    const statsWhere = {};
+    const statsWhere = { isDeleted: false };
 
     const weekSince = new Date();
     weekSince.setDate(weekSince.getDate() - 7);

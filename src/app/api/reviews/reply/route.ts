@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { requireAdminAuth } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
+    const auth = await requireAdminAuth(request);
+    if (!auth.ok) {
+      return NextResponse.json({ message: auth.message }, { status: auth.status });
+    }
+
     const body = await request.json();
     const reviewId = Number(body?.reviewId);
     const content = typeof body?.content === "string" ? body.content.trim() : "";
-    const adminName = typeof body?.adminName === "string" ? body.adminName.trim() : "管理员";
+    const adminName = auth.adminName;
 
     if (!reviewId || Number.isNaN(reviewId)) {
       return NextResponse.json({ message: "无效的评论ID" }, { status: 400 });
@@ -34,7 +40,7 @@ export async function POST(request: Request) {
       ? await prisma.reviewReply.update({
           where: { id: existingReply.id },
           data: {
-            adminName: adminName || "管理员",
+            adminName,
             content,
             repliedAt: new Date(),
           },
@@ -49,7 +55,7 @@ export async function POST(request: Request) {
       : await prisma.reviewReply.create({
           data: {
             reviewId,
-            adminName: adminName || "管理员",
+            adminName,
             content,
           },
           select: {

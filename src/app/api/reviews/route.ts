@@ -13,6 +13,7 @@ export async function GET(request: Request) {
       Math.max(1, Number(searchParams.get("pageSize")) || DEFAULT_PAGE_SIZE),
     );
     const query = (searchParams.get("query") || "").trim();
+    const status = (searchParams.get("status") || "all").trim();
 
     const where = {
       isDeleted: false,
@@ -25,6 +26,8 @@ export async function GET(request: Request) {
             ],
           }
         : {}),
+      ...(status === "replied" ? { replies: { some: {} } } : {}),
+      ...(status === "pending" ? { replies: { none: {} } } : {}),
     };
 
     const statsWhere = { isDeleted: false };

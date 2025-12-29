@@ -10,6 +10,7 @@ const formatDate = (value: Date) => {
 export async function GET() {
   try {
     const contacts = await prisma.customerCooperation.findMany({
+      where: { isDeleted: false },
       orderBy: { createdAt: "desc" },
       select: {
         name: true,

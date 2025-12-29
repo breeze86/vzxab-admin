@@ -40,22 +40,22 @@ export async function GET() {
       recentContacts,
     ] = await prisma.$transaction([
       prisma.review.count({ where: { isDeleted: false } }),
-      prisma.customerCooperation.count(),
+      prisma.customerCooperation.count({ where: { isDeleted: false } }),
       prisma.review.aggregate({ where: { isDeleted: false }, _avg: { rating: true } }),
       prisma.review.count({ where: { isDeleted: false, createdAt: { gte: weekStart, lt: weekEnd } } }),
-      prisma.customerCooperation.count({ where: { createdAt: { gte: weekStart, lt: weekEnd } } }),
+      prisma.customerCooperation.count({ where: { isDeleted: false, createdAt: { gte: weekStart, lt: weekEnd } } }),
       prisma.review.count({
         where: { isDeleted: false, createdAt: { gte: prevWeekStart, lt: weekStart } },
       }),
       prisma.customerCooperation.count({
-        where: { createdAt: { gte: prevWeekStart, lt: weekStart } },
+        where: { isDeleted: false, createdAt: { gte: prevWeekStart, lt: weekStart } },
       }),
       prisma.review.findMany({
         where: { isDeleted: false, createdAt: { gte: startDate } },
         select: { createdAt: true },
       }),
       prisma.customerCooperation.findMany({
-        where: { createdAt: { gte: startDate } },
+        where: { isDeleted: false, createdAt: { gte: startDate } },
         select: { createdAt: true },
       }),
       prisma.review.groupBy({
@@ -66,6 +66,7 @@ export async function GET() {
       }),
       prisma.customerCooperation.groupBy({
         by: ["subject"],
+        where: { isDeleted: false },
         orderBy: { subject: "asc" },
         _count: true,
       }),
@@ -82,6 +83,7 @@ export async function GET() {
         },
       }),
       prisma.customerCooperation.findMany({
+        where: { isDeleted: false },
         orderBy: { createdAt: "desc" },
         take: 5,
         select: {
@@ -161,7 +163,7 @@ export async function GET() {
     });
 
     const contactActiveEmails = await prisma.customerCooperation.findMany({
-      where: { createdAt: { gte: weekSince } },
+      where: { isDeleted: false, createdAt: { gte: weekSince } },
       distinct: ["email"],
       select: { email: true },
     });

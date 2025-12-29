@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Download, MessageSquare, Pencil, Reply, Search, Star, Trash2, TrendingUp, X } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Download, MessageSquare, Pencil, Reply, Search, Star, Trash2, TrendingUp, X } from "lucide-react";
 
 type ReviewReply = {
   id: number;
@@ -40,10 +40,12 @@ export default function CommentsPage() {
   const [stats, setStats] = useState<ReviewStats>({ total: 0, avgRating: 0, weekCount: 0 });
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [pageSize, setPageSize] = useState(5);
   const [isLoading, setIsLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [isReplyOpen, setIsReplyOpen] = useState(false);
   const [replyTarget, setReplyTarget] = useState<ReviewItem | null>(null);
   const [replyContent, setReplyContent] = useState("");
@@ -60,6 +62,7 @@ export default function CommentsPage() {
           page: String(page),
           pageSize: String(pageSize),
           ...(query ? { query } : {}),
+          ...(statusFilter !== "all" ? { status: statusFilter } : {}),
         });
         const response = await fetch(`/api/reviews?${search.toString()}`);
         if (!response.ok) {
@@ -84,7 +87,7 @@ export default function CommentsPage() {
     return () => {
       isActive = false;
     };
-  }, [page, pageSize, query, refreshKey]);
+  }, [page, pageSize, query, statusFilter, refreshKey]);
 
   const displayPages = useMemo(() => {
     if (totalPages <= 0) return [];
@@ -122,6 +125,11 @@ export default function CommentsPage() {
   const handleSearchChange = (value: string) => {
     setPage(1);
     setQuery(value);
+  };
+
+  const handleStatusChange = (value: string) => {
+    setPage(1);
+    setStatusFilter(value);
   };
 
   const handleExport = async () => {
@@ -174,9 +182,13 @@ export default function CommentsPage() {
     setIsReplySubmitting(true);
     setReplyError("");
     try {
+      const token = localStorage.getItem("auth_token");
       const response = await fetch("/api/reviews/reply", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           reviewId: replyTarget.id,
           content,
@@ -196,6 +208,34 @@ export default function CommentsPage() {
       setReplyError("回复失败，请稍后重试");
     } finally {
       setIsReplySubmitting(false);
+    }
+  };
+
+  const handleDelete = async (reviewId: number) => {
+    if (deletingId) return;
+    setDeletingId(reviewId);
+    try {
+      const token = localStorage.getItem("auth_token");
+      const response = await fetch("/api/reviews/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ reviewId }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        window.alert(data?.message || "删除失败，请稍后重试");
+        return;
+      }
+
+      setRefreshKey((key) => key + 1);
+    } catch (error) {
+      window.alert("删除失败，请稍后重试");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -259,6 +299,18 @@ export default function CommentsPage() {
               value={query}
               onChange={(event) => handleSearchChange(event.target.value)}
             />
+          </div>
+          <div className="relative inline-block">
+            <select
+              className="appearance-none h-12.5 pr-10 rounded-[10px] border border-[#e5e7eb] bg-white px-4 text-[16px] tracking-[-0.3125px] text-[#0a0a0a]"
+              value={statusFilter}
+              onChange={(event) => handleStatusChange(event.target.value)}
+            >
+              <option value="all">全部状态</option>
+              <option value="pending">待回复</option>
+              <option value="replied">已回复</option>
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-[10px] top-1/2 -translate-y-1/2 h-4 w-4" color="#888f9b"/>
           </div>
           <button
             className="flex h-[50px] items-center gap-2 rounded-[10px] border border-[#e5e7eb] bg-white px-4 text-[16px] tracking-[-0.3125px] text-[#155dfc] hover:bg-[#eff6ff]"
@@ -348,8 +400,12 @@ export default function CommentsPage() {
                       {isReplied ? "修改" : "回复"}
                     </button>
                     <button
-                      className="flex h-8 w-[72px] items-center justify-center gap-2 rounded-[10px] text-[14px] tracking-[-0.1504px] text-[#e7000b] hover:bg-[#fff1f2]"
+                      className={`flex h-8 w-[72px] items-center justify-center gap-2 rounded-[10px] text-[14px] tracking-[-0.1504px] text-[#e7000b] hover:bg-[#fff1f2] ${
+                        deletingId === review.id ? "opacity-60 cursor-not-allowed" : ""
+                      }`}
                       type="button"
+                      onClick={() => handleDelete(review.id)}
+                      disabled={deletingId === review.id}
                     >
                       <Trash2 className="h-4 w-4" strokeWidth={1.8} />
                       删除

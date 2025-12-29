@@ -308,7 +308,7 @@ export default function DashboardPage() {
             <div className="flex flex-col gap-6 rounded-[14px] border border-[#e5e7eb] bg-white px-[25px] pb-px pt-[25px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)]">
               <div className="text-[18px] font-medium leading-[27px] tracking-[-0.4395px] text-[#101828]">联系主题分布</div>
               <div className="relative h-[244px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minHeight={250}>
                   <PieChart>
                     <Pie
                       data={pieData}

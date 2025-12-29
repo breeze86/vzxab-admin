@@ -48,6 +48,8 @@ export default function ContactsPage() {
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const pageSize = 5;
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -86,7 +88,7 @@ export default function ContactsPage() {
     return () => {
       isActive = false;
     };
-  }, [page, pageSize, query, subjectFilter]);
+  }, [page, pageSize, query, subjectFilter, refreshKey]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -161,6 +163,34 @@ export default function ContactsPage() {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       // Ignore export errors for now.
+    }
+  };
+
+  const handleDelete = async (contactId: number) => {
+    if (deletingId) return;
+    setDeletingId(contactId);
+    try {
+      const token = localStorage.getItem("auth_token");
+      const response = await fetch("/api/contacts/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ contactId }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        window.alert(data?.message || "删除失败，请稍后重试");
+        return;
+      }
+
+      setRefreshKey((key) => key + 1);
+    } catch (error) {
+      window.alert("删除失败，请稍后重试");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -308,8 +338,12 @@ export default function ContactsPage() {
                 </div>
                 <div className="flex items-center px-6">
                   <button
-                    className="flex h-9 items-center gap-2 rounded-[10px] px-3 text-[14px] tracking-[-0.1504px] text-[#e7000b] cursor-pointer transition-colors hover:bg-[#fff1f2]"
+                    className={`flex h-9 items-center gap-2 rounded-[10px] px-3 text-[14px] tracking-[-0.1504px] text-[#e7000b] transition-colors hover:bg-[#fff1f2] ${
+                      deletingId === contact.id ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
+                    }`}
                     type="button"
+                    onClick={() => handleDelete(contact.id)}
+                    disabled={deletingId === contact.id}
                   >
                     <Trash2 className="h-4 w-4" strokeWidth={1.8} />
                     删除
