@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, ChevronLeft, ChevronRight, Download, Mail, MessageSquare, Search, Trash2, TrendingUp } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Download, Mail, MessageSquare, Search, Trash2, TrendingUp, X } from "lucide-react";
 
 type ContactItem = {
   id: number;
@@ -50,6 +50,8 @@ export default function ContactsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<ContactItem | null>(null);
   const pageSize = 5;
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -164,6 +166,16 @@ export default function ContactsPage() {
     } catch (error) {
       // Ignore export errors for now.
     }
+  };
+
+  const openDelete = (contact: ContactItem) => {
+    setDeleteTarget(contact);
+    setIsDeleteOpen(true);
+  };
+
+  const closeDelete = () => {
+    setIsDeleteOpen(false);
+    setDeleteTarget(null);
   };
 
   const handleDelete = async (contactId: number) => {
@@ -342,7 +354,7 @@ export default function ContactsPage() {
                       deletingId === contact.id ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
                     }`}
                     type="button"
-                    onClick={() => handleDelete(contact.id)}
+                    onClick={() => openDelete(contact)}
                     disabled={deletingId === contact.id}
                   >
                     <Trash2 className="h-4 w-4" strokeWidth={1.8} />
@@ -412,6 +424,55 @@ export default function ContactsPage() {
             </div>
           </div>
         </div>
+      {isDeleteOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(15,23,42,0.4)] px-4"
+          onClick={closeDelete}
+        >
+          <div
+            className="w-full max-w-[420px] rounded-[16px] bg-white p-6 shadow-[0px_20px_60px_rgba(15,23,42,0.25)]"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <div className="text-[18px] font-medium tracking-[-0.3125px] text-[#101828]">
+                确认删除
+              </div>
+              <button
+                className="flex h-8 w-8 items-center justify-center rounded-full text-[#6a7282] hover:bg-[#f3f4f6]"
+                type="button"
+                onClick={closeDelete}
+              >
+                <X className="h-4 w-4" strokeWidth={1.8} />
+              </button>
+            </div>
+            <div className="mt-3 text-[14px] tracking-[-0.1504px] text-[#4a5565]">
+              确定要删除该联系信息吗？删除后将不可恢复。
+            </div>
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                className="h-[40px] rounded-[10px] border border-[#e5e7eb] px-4 text-[14px] tracking-[-0.1504px] text-[#4a5565] hover:bg-[#f3f4f6]"
+                type="button"
+                onClick={closeDelete}
+              >
+                取消
+              </button>
+              <button
+                className="h-[40px] rounded-[10px] bg-[#e7000b] px-4 text-[14px] tracking-[-0.1504px] text-white hover:bg-[#c10007] disabled:cursor-not-allowed disabled:opacity-60"
+                type="button"
+                onClick={() => {
+                  if (!deleteTarget) return;
+                  closeDelete();
+                  handleDelete(deleteTarget.id);
+                }}
+                disabled={!deleteTarget || deletingId === deleteTarget?.id}
+              >
+                确认删除
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       </div>
     </div>
   );

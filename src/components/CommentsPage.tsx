@@ -47,6 +47,8 @@ export default function CommentsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [isReplyOpen, setIsReplyOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<ReviewItem | null>(null);
   const [replyTarget, setReplyTarget] = useState<ReviewItem | null>(null);
   const [replyContent, setReplyContent] = useState("");
   const [isReplySubmitting, setIsReplySubmitting] = useState(false);
@@ -209,6 +211,16 @@ export default function CommentsPage() {
     } finally {
       setIsReplySubmitting(false);
     }
+  };
+
+  const openDelete = (review: ReviewItem) => {
+    setDeleteTarget(review);
+    setIsDeleteOpen(true);
+  };
+
+  const closeDelete = () => {
+    setIsDeleteOpen(false);
+    setDeleteTarget(null);
   };
 
   const handleDelete = async (reviewId: number) => {
@@ -404,7 +416,7 @@ export default function CommentsPage() {
                         deletingId === review.id ? "opacity-60 cursor-not-allowed" : ""
                       }`}
                       type="button"
-                      onClick={() => handleDelete(review.id)}
+                      onClick={() => openDelete(review)}
                       disabled={deletingId === review.id}
                     >
                       <Trash2 className="h-4 w-4" strokeWidth={1.8} />
@@ -495,6 +507,55 @@ export default function CommentsPage() {
           </div>
         </div>
       </div>
+
+      {isDeleteOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(15,23,42,0.4)] px-4"
+          onClick={closeDelete}
+        >
+          <div
+            className="w-full max-w-[420px] rounded-[16px] bg-white p-6 shadow-[0px_20px_60px_rgba(15,23,42,0.25)]"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <div className="text-[18px] font-medium tracking-[-0.3125px] text-[#101828]">
+                确认删除
+              </div>
+              <button
+                className="flex h-8 w-8 items-center justify-center rounded-full text-[#6a7282] hover:bg-[#f3f4f6]"
+                type="button"
+                onClick={closeDelete}
+              >
+                <X className="h-4 w-4" strokeWidth={1.8} />
+              </button>
+            </div>
+            <div className="mt-3 text-[14px] tracking-[-0.1504px] text-[#4a5565]">
+              确定要删除该评论吗？删除后将不可恢复。
+            </div>
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                className="h-[40px] rounded-[10px] border border-[#e5e7eb] px-4 text-[14px] tracking-[-0.1504px] text-[#4a5565] hover:bg-[#f3f4f6]"
+                type="button"
+                onClick={closeDelete}
+              >
+                取消
+              </button>
+              <button
+                className="h-[40px] rounded-[10px] bg-[#e7000b] px-4 text-[14px] tracking-[-0.1504px] text-white hover:bg-[#c10007] disabled:cursor-not-allowed disabled:opacity-60"
+                type="button"
+                onClick={() => {
+                  if (!deleteTarget) return;
+                  closeDelete();
+                  handleDelete(deleteTarget.id);
+                }}
+                disabled={!deleteTarget || deletingId === deleteTarget?.id}
+              >
+                确认删除
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isReplyOpen && (
         <div
