@@ -62,12 +62,12 @@ export async function GET() {
         by: ["rating"],
         where: { isDeleted: false },
         orderBy: { rating: "asc" },
-        _count: { rating: true },
+        _count: true,
       }),
       prisma.customerCooperation.groupBy({
         by: ["subject"],
         orderBy: { subject: "asc" },
-        _count: { subject: true },
+        _count: true,
       }),
       prisma.review.findMany({
         where: { isDeleted: false },
@@ -117,12 +117,12 @@ export async function GET() {
 
     const ratingDistribution = [1, 2, 3, 4, 5].map((rating) => {
       const match = ratings.find((item) => item.rating === rating);
-      return { rating, count: match?._count?.rating ?? 0 };
+      return { rating, count: match?._count ?? 0 };
     });
 
     const contactSubjects = subjects
       .filter((item) => item.subject)
-      .map((item) => ({ subject: item.subject, count: item._count.subject }));
+      .map((item) => ({ subject: item.subject, count: item._count ?? 0 }));
 
     const activity = [
       ...recentReviews.map((review) => ({
