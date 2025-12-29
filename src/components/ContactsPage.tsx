@@ -24,11 +24,9 @@ const subjectStyles: Record<string, string> = {
   合作洽谈: "bg-[#dcfce7] text-[#008236]",
   功能建议: "bg-[#ffedd4] text-[#ca3500]",
   价格咨询: "bg-[#ffe4e6] text-[#e11d48]",
-  售前演示: "bg-[#e0f2fe] text-[#0369a1]",
-  账号问题: "bg-[#fef9c2] text-[#a16207]",
+  售后保修: "bg-[#e0f2fe] text-[#0369a1]",
   发票开具: "bg-[#ede9fe] text-[#5b21b6]",
-  数据迁移: "bg-[#d1fae5] text-[#047857]",
-  系统集成: "bg-[#e2e8f0] text-[#334155]",
+  购买咨询: "bg-[#d1fae5] text-[#047857]",
 };
 
 const formatDate = (value: string) => {
@@ -52,7 +50,7 @@ export default function ContactsPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ContactItem | null>(null);
-  const pageSize = 5;
+  const [pageSize, setPageSize] = useState(5);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -146,6 +144,11 @@ export default function ContactsPage() {
     setPage(1);
     setSubjectFilter(value);
     setIsSubjectOpen(false);
+  };
+
+  const handlePageSizeChange = (value: number) => {
+    setPage(1);
+    setPageSize(value);
   };
 
   const handleExport = async () => {
@@ -371,8 +374,27 @@ export default function ContactsPage() {
             )}
 
             <div className="flex h-[73px] w-full items-center justify-between border-t border-[#e5e7eb] px-6 text-[14px] tracking-[-0.1504px] text-[#4a5565]">
-              <div>
-                显示 {startIndex} - {endIndex} 条，共 {total} 条
+              <div className="flex items-center gap-3">
+                <div>
+                  显示 {startIndex} - {endIndex} 条，共 {total} 条
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[#6a7282]">每页</span>
+                  <div className="relative">
+                    <select
+                      className="h-[34px] rounded-[10px] border border-[#e5e7eb] bg-white px-3 text-[14px] text-[#101828] focus:outline-none"
+                      value={pageSize}
+                      onChange={(event) => handlePageSizeChange(Number(event.target.value))}
+                    >
+                      {[5, 10, 20, 50].map((size) => (
+                        <option key={size} value={size}>
+                          {size}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <span className="text-[#6a7282]">条</span>
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <button
