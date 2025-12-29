@@ -96,8 +96,10 @@ const pieColors = ["#3b82f6", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444", "#06b6
 
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     let isActive = true;
     const loadDashboard = async () => {
       try {
@@ -266,39 +268,43 @@ export default function DashboardPage() {
           <div className="flex flex-col gap-6 rounded-[14px] border border-[#e5e7eb] bg-white px-[25px] pb-px pt-[25px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)]">
             <div className="text-[18px] font-medium leading-[27px] tracking-[-0.4395px] text-[#101828]">7天数据趋势</div>
             <div className="h-[250px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={trend} margin={{ top: 16, right: 16, left: 0, bottom: 0 }}>
-                  <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" />
-                  <XAxis dataKey="date" tickFormatter={formatDateShort} stroke="#6b7280" fontSize={12} />
-                  <YAxis stroke="#6b7280" fontSize={12} allowDecimals={false} />
-                  <Tooltip
-                    contentStyle={{ borderRadius: 12, borderColor: "#e5e7eb" }}
-                    formatter={(value) => String(value ?? "")}
-                    labelFormatter={(label) => `日期 ${formatDateShort(label)}`}
-                  />
-                  <Legend verticalAlign="top" height={24} iconType="circle" />
-                  <Line type="monotone" dataKey="reviews" name="评论" stroke="#155dfc" strokeWidth={2} dot={{ r: 3 }} />
-                  <Line type="monotone" dataKey="contacts" name="联系" stroke="#7c3aed" strokeWidth={2} dot={{ r: 3 }} />
-                </LineChart>
-              </ResponsiveContainer>
+              {isMounted ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={trend} margin={{ top: 16, right: 16, left: 0, bottom: 0 }}>
+                    <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" />
+                    <XAxis dataKey="date" tickFormatter={formatDateShort} stroke="#6b7280" fontSize={12} />
+                    <YAxis stroke="#6b7280" fontSize={12} allowDecimals={false} />
+                    <Tooltip
+                      contentStyle={{ borderRadius: 12, borderColor: "#e5e7eb" }}
+                      formatter={(value) => String(value ?? "")}
+                      labelFormatter={(label) => `日期 ${formatDateShort(label)}`}
+                    />
+                    <Legend verticalAlign="top" height={24} iconType="circle" />
+                    <Line type="monotone" dataKey="reviews" name="评论" stroke="#155dfc" strokeWidth={2} dot={{ r: 3 }} />
+                    <Line type="monotone" dataKey="contacts" name="联系" stroke="#7c3aed" strokeWidth={2} dot={{ r: 3 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : null}
             </div>
           </div>
 
           <div className="flex flex-col gap-6 rounded-[14px] border border-[#e5e7eb] bg-white px-[25px] pb-px pt-[25px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)]">
             <div className="text-[18px] font-medium leading-[27px] tracking-[-0.4395px] text-[#101828]">评分分布</div>
             <div className="h-[250px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={ratingDistribution} margin={{ top: 16, right: 16, left: 0, bottom: 0 }}>
-                  <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" />
-                  <XAxis dataKey="rating" stroke="#6b7280" fontSize={12} tickFormatter={(value) => `${value}星`} />
-                  <YAxis stroke="#6b7280" fontSize={12} allowDecimals={false} />
-                  <Tooltip
-                    contentStyle={{ borderRadius: 12, borderColor: "#e5e7eb" }}
-                    formatter={(value) => [`${value ?? ""}`, "数量"]}
-                  />
-                  <Bar dataKey="count" fill="#155dfc" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              {isMounted ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={ratingDistribution} margin={{ top: 16, right: 16, left: 0, bottom: 0 }}>
+                    <CartesianGrid stroke="#e5e7eb" strokeDasharray="3 3" />
+                    <XAxis dataKey="rating" stroke="#6b7280" fontSize={12} tickFormatter={(value) => `${value}星`} />
+                    <YAxis stroke="#6b7280" fontSize={12} allowDecimals={false} />
+                    <Tooltip
+                      contentStyle={{ borderRadius: 12, borderColor: "#e5e7eb" }}
+                      formatter={(value) => [`${value ?? ""}`, "数量"]}
+                    />
+                    <Bar dataKey="count" fill="#155dfc" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : null}
             </div>
           </div>
         </div>
@@ -308,28 +314,30 @@ export default function DashboardPage() {
             <div className="flex flex-col gap-6 rounded-[14px] border border-[#e5e7eb] bg-white px-[25px] pb-px pt-[25px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)]">
               <div className="text-[18px] font-medium leading-[27px] tracking-[-0.4395px] text-[#101828]">联系主题分布</div>
               <div className="relative h-[244px] w-full">
-                <ResponsiveContainer width="100%" height="100%" minHeight={250}>
-                  <PieChart>
-                    <Pie
-                      data={pieData}
-                      dataKey="value"
-                      nameKey="name"
-                      outerRadius={90}
-                      innerRadius={40}
-                      paddingAngle={2}
-                      label={({ percent }) => `${Math.round((percent ?? 0) * 100)}%`}
-                      labelLine={false}
-                    >
-                      {pieData.map((entry, index) => (
-                        <Cell key={entry.name} fill={pieColors[index % pieColors.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{ borderRadius: 12, borderColor: "#e5e7eb" }}
-                      formatter={(value) => [`${value ?? ""}`, "数量"]}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
+                {isMounted ? (
+                  <ResponsiveContainer width="100%" height="100%" minHeight={250}>
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        dataKey="value"
+                        nameKey="name"
+                        outerRadius={90}
+                        innerRadius={40}
+                        paddingAngle={2}
+                        label={({ percent }) => `${Math.round((percent ?? 0) * 100)}%`}
+                        labelLine={false}
+                      >
+                        {pieData.map((entry, index) => (
+                          <Cell key={entry.name} fill={pieColors[index % pieColors.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{ borderRadius: 12, borderColor: "#e5e7eb" }}
+                        formatter={(value) => [`${value ?? ""}`, "数量"]}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : null}
               </div>
               <div className="flex flex-col gap-2 text-[12px] text-[#6b7280]">
                 {pieData.map((item, index) => {
