@@ -24,7 +24,7 @@ const subjectStyles: Record<string, string> = {
   合作洽谈: "bg-[#dcfce7] text-[#008236]",
   功能建议: "bg-[#ffedd4] text-[#ca3500]",
   价格咨询: "bg-[#ffe4e6] text-[#e11d48]",
-  售后保修: "bg-[#e0f2fe] text-[#0369a1]",
+  售后保修: "bg-[#d1fae5] text-[#047857]",
   发票开具: "bg-[#ede9fe] text-[#5b21b6]",
   其他问题: "bg-[#e0f2fe] text-[#0369a1]",
 };
