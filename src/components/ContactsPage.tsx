@@ -26,7 +26,7 @@ const subjectStyles: Record<string, string> = {
   价格咨询: "bg-[#ffe4e6] text-[#e11d48]",
   售后保修: "bg-[#e0f2fe] text-[#0369a1]",
   发票开具: "bg-[#ede9fe] text-[#5b21b6]",
-  购买咨询: "bg-[#d1fae5] text-[#047857]",
+  其他问题: "bg-[#e0f2fe] text-[#0369a1]",
 };
 
 const formatDate = (value: string) => {
