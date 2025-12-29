@@ -56,7 +56,7 @@ const subjects = [
   "价格咨询",
   "售后保修",
   "发票开具",
-  "购买咨询",
+  "其他问题",
 ];
 
 const messages = [
