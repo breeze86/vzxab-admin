@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  CheckCheck,
   ChevronLeft,
   ChevronRight,
   ChevronsDown,
@@ -146,6 +147,7 @@ export default function BannersPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [processingAction, setProcessingAction] = useState<string | null>(null);
   const [isComposingSearch, setIsComposingSearch] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   const titleCount = getCharacterCount(form.title);
   const summaryCount = getCharacterCount(form.summary);
@@ -211,6 +213,11 @@ export default function BannersPage() {
     }
   }, [page, totalPages]);
 
+  useEffect(() => {
+    const currentIds = new Set(banners.map((item) => item.id));
+    setSelectedIds((current) => current.filter((id) => currentIds.has(id)));
+  }, [banners]);
+
   const maxSortOrder = useMemo(
     () => (editingBanner ? Math.max(1, stats.total) : stats.total + 1),
     [editingBanner, stats.total],
@@ -242,6 +249,9 @@ export default function BannersPage() {
 
   const startIndex = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const endIndex = Math.min(page * pageSize, total);
+  const currentPageIds = banners.map((banner) => banner.id);
+  const isAllCurrentPageSelected =
+    currentPageIds.length > 0 && currentPageIds.every((id) => selectedIds.includes(id));
 
   const applySearch = (value: string) => {
     setPage(1);
@@ -278,6 +288,23 @@ export default function BannersPage() {
   const handlePageSizeChange = (value: number) => {
     setPage(1);
     setPageSize(value);
+  };
+
+  const handleToggleSelectAll = () => {
+    if (isAllCurrentPageSelected) {
+      setSelectedIds((current) => current.filter((id) => !currentPageIds.includes(id)));
+      return;
+    }
+
+    setSelectedIds((current) => Array.from(new Set([...current, ...currentPageIds])));
+  };
+
+  const handleToggleSelectOne = (bannerId: number) => {
+    setSelectedIds((current) =>
+      current.includes(bannerId)
+        ? current.filter((id) => id !== bannerId)
+        : [...current, bannerId],
+    );
   };
 
   const openCreateModal = () => {
@@ -432,6 +459,41 @@ export default function BannersPage() {
     }
   };
 
+  const handleBatchStatusChange = async (isActive: boolean) => {
+    if (!selectedIds.length) {
+      return;
+    }
+
+    const actionKey = isActive ? "batch:enable" : "batch:disable";
+    setProcessingAction(actionKey);
+    try {
+      const response = await fetch("/api/banners/batch-status", {
+        method: "POST",
+        headers: getAuthHeaders(true),
+        body: JSON.stringify({ ids: selectedIds, isActive }),
+      });
+
+      if (response.status === 401) {
+        localStorage.removeItem("auth_token");
+        router.replace("/login");
+        return;
+      }
+
+      const data = await response.json().catch(() => null);
+      if (!response.ok) {
+        window.alert(data?.message || "批量更新横幅状态失败");
+        return;
+      }
+
+      setSelectedIds([]);
+      setRefreshKey((value) => value + 1);
+    } catch {
+      window.alert("批量更新横幅状态失败");
+    } finally {
+      setProcessingAction(null);
+    }
+  };
+
   return (
     <div className="flex w-full min-w-0 flex-col items-start">
       <div className="flex w-full min-w-0 flex-col gap-8 px-8 pb-8 pt-8">
@@ -470,43 +532,90 @@ export default function BannersPage() {
           </div>
         </div>
 
-        <div className="flex h-[50px] w-full items-center gap-4">
-          <div className="relative flex h-[50px] flex-1 items-center rounded-[10px] border border-[#e5e7eb] bg-white pl-12 pr-4">
-            <Search className="absolute left-4 h-5 w-5 text-[#9ca3af]" strokeWidth={1.8} />
-            <input
-              className="w-full text-[16px] tracking-[-0.3125px] text-[#0a0a0a] placeholder:text-[rgba(10,10,10,0.5)]"
-              placeholder="搜索标题、描述或跳转链接..."
-              value={searchInput}
-              onChange={(event) => handleSearchChange(event.target.value)}
-              onCompositionStart={handleSearchCompositionStart}
-              onCompositionEnd={(event) => handleSearchCompositionEnd(event.currentTarget.value)}
-            />
+        <div className="flex w-full items-center justify-between gap-4 rounded-[12px] border border-[#e5e7eb] bg-white p-3">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <div className="relative flex h-[50px] min-w-0 flex-1 items-center rounded-[10px] border border-[#e5e7eb] bg-white pl-12 pr-4">
+              <Search className="absolute left-4 h-5 w-5 text-[#9ca3af]" strokeWidth={1.8} />
+              <input
+                className="w-full text-[16px] tracking-[-0.3125px] text-[#0a0a0a] placeholder:text-[rgba(10,10,10,0.5)]"
+                placeholder="搜索标题、描述或跳转链接..."
+                value={searchInput}
+                onChange={(event) => handleSearchChange(event.target.value)}
+                onCompositionStart={handleSearchCompositionStart}
+                onCompositionEnd={(event) => handleSearchCompositionEnd(event.currentTarget.value)}
+              />
+            </div>
+            <select
+              className="h-[50px] rounded-[10px] border border-[#e5e7eb] bg-white px-4 text-[16px] tracking-[-0.3125px] text-[#0a0a0a]"
+              value={mediaTypeFilter}
+              onChange={(event) => handleMediaTypeChange(event.target.value as "all" | BannerMediaType)}
+            >
+              <option value="all">全部类型</option>
+              <option value="IMAGE">图片横幅</option>
+              <option value="VIDEO">视频横幅</option>
+            </select>
+            <select
+              className="h-[50px] rounded-[10px] border border-[#e5e7eb] bg-white px-4 text-[16px] tracking-[-0.3125px] text-[#0a0a0a]"
+              value={statusFilter}
+              onChange={(event) =>
+                handleStatusChange(event.target.value as "all" | "active" | "inactive")
+              }
+            >
+              <option value="all">全部状态</option>
+              <option value="active">已启用</option>
+              <option value="inactive">未启用</option>
+            </select>
           </div>
-          <select
-            className="h-[50px] rounded-[10px] border border-[#e5e7eb] bg-white px-4 text-[16px] tracking-[-0.3125px] text-[#0a0a0a]"
-            value={mediaTypeFilter}
-            onChange={(event) => handleMediaTypeChange(event.target.value as "all" | BannerMediaType)}
-          >
-            <option value="all">全部类型</option>
-            <option value="IMAGE">图片横幅</option>
-            <option value="VIDEO">视频横幅</option>
-          </select>
-          <select
-            className="h-[50px] rounded-[10px] border border-[#e5e7eb] bg-white px-4 text-[16px] tracking-[-0.3125px] text-[#0a0a0a]"
-            value={statusFilter}
-            onChange={(event) =>
-              handleStatusChange(event.target.value as "all" | "active" | "inactive")
-            }
-          >
-            <option value="all">全部状态</option>
-            <option value="active">已启用</option>
-            <option value="inactive">未启用</option>
-          </select>
+
+          <div className="flex shrink-0 items-center gap-3 rounded-[10px] border border-[#eef2f6] bg-[#f8fafc] px-3 py-2.5">
+            <div className="whitespace-nowrap text-[14px] text-[#4a5565]">
+              已选 <span className="font-medium text-[#101828]">{selectedIds.length}</span> 项
+            </div>
+            <div className="flex items-center gap-2">
+            <button
+              className="inline-flex h-9 items-center gap-2 rounded-[10px] border border-[#bfdbfe] bg-[#eff6ff] px-4 text-[14px] text-[#155dfc] hover:bg-[#dbeafe] disabled:cursor-not-allowed disabled:opacity-60"
+              type="button"
+              onClick={() => handleBatchStatusChange(true)}
+              disabled={!selectedIds.length || processingAction !== null}
+            >
+              {processingAction === "batch:enable" ? (
+                <LoaderCircle className="h-4 w-4 animate-spin" />
+              ) : (
+                <CheckCheck className="h-4 w-4" />
+              )}
+              批量启用
+            </button>
+            <button
+              className="inline-flex h-9 items-center gap-2 rounded-[10px] border border-[#d1d5db] bg-[#f9fafb] px-4 text-[14px] text-[#4a5565] hover:bg-[#f3f4f6] disabled:cursor-not-allowed disabled:opacity-60"
+              type="button"
+              onClick={() => handleBatchStatusChange(false)}
+              disabled={!selectedIds.length || processingAction !== null}
+            >
+              {processingAction === "batch:disable" ? (
+                <LoaderCircle className="h-4 w-4 animate-spin" />
+              ) : (
+                <X className="h-4 w-4" />
+              )}
+              批量停用
+            </button>
+            </div>
+          </div>
         </div>
 
         <div className="w-full min-w-0 overflow-x-auto">
           <div className="min-w-[1220px] overflow-hidden rounded-[14px] border border-[#e5e7eb] bg-white">
-            <div className="grid grid-cols-[102px_minmax(260px,2.2fr)_minmax(150px,1fr)_minmax(130px,0.8fr)_120px_170px_256px] border-b border-[#e5e7eb] bg-[#f9fafb] text-[15px] font-semibold text-[#4a5565]">
+            <div className="grid grid-cols-[52px_102px_minmax(260px,2.2fr)_minmax(150px,1fr)_minmax(130px,0.8fr)_120px_170px_256px] border-b border-[#e5e7eb] bg-[#f9fafb] text-[15px] font-semibold text-[#4a5565]">
+              <div
+                className="flex cursor-pointer items-center justify-center px-3 py-4"
+                onClick={handleToggleSelectAll}
+              >
+                <input
+                  className="pointer-events-none h-4 w-4 rounded border-[#d0d5dd] text-[#155dfc] focus:ring-[#93c5fd]"
+                  type="checkbox"
+                  checked={isAllCurrentPageSelected}
+                  readOnly
+                />
+              </div>
               <div className="px-5 py-4">顺序</div>
               <div className="px-5 py-4">横幅内容</div>
               <div className="px-5 py-4">媒体资源</div>
@@ -523,8 +632,19 @@ export default function BannersPage() {
               return (
                 <div
                   key={banner.id}
-                  className="grid grid-cols-[102px_minmax(260px,2.2fr)_minmax(150px,1fr)_minmax(130px,0.8fr)_120px_170px_256px] border-b border-[#e5e7eb] text-[14px] text-[#364153]"
+                  className="grid grid-cols-[52px_102px_minmax(260px,2.2fr)_minmax(150px,1fr)_minmax(130px,0.8fr)_120px_170px_256px] border-b border-[#e5e7eb] text-[14px] text-[#364153]"
                 >
+                  <div
+                    className="flex cursor-pointer items-center justify-center px-3 py-5"
+                    onClick={() => handleToggleSelectOne(banner.id)}
+                  >
+                    <input
+                      className="pointer-events-none h-4 w-4 rounded border-[#d0d5dd] text-[#155dfc] focus:ring-[#93c5fd]"
+                      type="checkbox"
+                      checked={selectedIds.includes(banner.id)}
+                      readOnly
+                    />
+                  </div>
                   <div className="px-5 py-5">
                     <div className="text-[18px] font-semibold text-[#101828]">{banner.sortOrder}</div>
                     <div className="mt-1 text-[12px] text-[#6a7282]">前台排序位</div>
@@ -655,18 +775,18 @@ export default function BannersPage() {
                           </button>
                           <button
                             className={`inline-flex h-8 w-full items-center justify-center gap-1 rounded-[8px] border border-[#bfdbfe] bg-white px-2 text-[12px] text-[#155dfc] hover:bg-[#eff6ff] ${
-                              isLast ? "cursor-not-allowed opacity-40" : ""
+                              isFirst ? "cursor-not-allowed opacity-40" : ""
                             }`}
                             type="button"
-                            onClick={() => reorderBanner(banner.id, "move_down")}
-                            disabled={isLast || processingAction !== null}
+                            onClick={() => reorderBanner(banner.id, "move_up")}
+                            disabled={isFirst || processingAction !== null}
                           >
-                            {processingAction === `move_down:${banner.id}` ? (
+                            {processingAction === `move_up:${banner.id}` ? (
                               <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
                             ) : (
-                              <MoveDown className="h-3.5 w-3.5" />
+                              <MoveUp className="h-3.5 w-3.5" />
                             )}
-                            下移
+                            上移
                           </button>
                           <button
                             className={`inline-flex h-8 w-full items-center justify-center gap-1 rounded-[8px] border border-[#bfdbfe] bg-white px-2 text-[12px] text-[#155dfc] hover:bg-[#eff6ff] ${
@@ -685,18 +805,18 @@ export default function BannersPage() {
                           </button>
                           <button
                             className={`inline-flex h-8 w-full items-center justify-center gap-1 rounded-[8px] border border-[#bfdbfe] bg-white px-2 text-[12px] text-[#155dfc] hover:bg-[#eff6ff] ${
-                              isFirst ? "cursor-not-allowed opacity-40" : ""
+                              isLast ? "cursor-not-allowed opacity-40" : ""
                             }`}
                             type="button"
-                            onClick={() => reorderBanner(banner.id, "move_up")}
-                            disabled={isFirst || processingAction !== null}
+                            onClick={() => reorderBanner(banner.id, "move_down")}
+                            disabled={isLast || processingAction !== null}
                           >
-                            {processingAction === `move_up:${banner.id}` ? (
+                            {processingAction === `move_down:${banner.id}` ? (
                               <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
                             ) : (
-                              <MoveUp className="h-3.5 w-3.5" />
+                              <MoveDown className="h-3.5 w-3.5" />
                             )}
-                            上移
+                            下移
                           </button>
                         </div>
                       </div>
