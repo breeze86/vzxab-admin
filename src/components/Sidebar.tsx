@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BarChart3, LayoutGrid, LogOut, Mail, MessageSquare } from "lucide-react";
+import { BarChart3, Image, LayoutGrid, LogOut, Mail, MessageSquare } from "lucide-react";
 
 const navItems = [
   {
@@ -23,6 +23,12 @@ const navItems = [
     href: "/contacts",
     icon: Mail,
   },
+  {
+    key: "banners",
+    label: "首页横幅",
+    href: "/banners",
+    icon: Image,
+  },
 ] as const;
 
 type NavKey = (typeof navItems)[number]["key"];
@@ -30,6 +36,7 @@ type NavKey = (typeof navItems)[number]["key"];
 const getActiveKey = (pathname: string): NavKey => {
   if (pathname.startsWith("/comments")) return "comments";
   if (pathname.startsWith("/contacts")) return "contacts";
+  if (pathname.startsWith("/banners")) return "banners";
   return "dashboard";
 };
 
@@ -47,7 +54,7 @@ export default function Sidebar() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token }),
         });
-      } catch (error) {
+      } catch {
         // Ignore API failures and still clear local session.
       }
     }
