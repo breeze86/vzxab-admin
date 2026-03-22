@@ -14,7 +14,8 @@
     "admin:reset-password": "node scripts/reset-admin-password.cjs",
     "lint": "eslint",
     "seed:reviews": "node scripts/seed-reviews.cjs",
-    "seed:contacts": "node scripts/seed-contacts.cjs"
+    "seed:contacts": "node scripts/seed-contacts.cjs",
+    "seed:faqs": "node scripts/seed-faqs.cjs"
   },
   "dependencies": {
     "@prisma/client": "^6.19.1",

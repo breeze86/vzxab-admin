@@ -83,6 +83,11 @@ enum HeroBannerVideoPlayMode {
   AUTO
 }
 
+enum DownloadCenterActionType {
+  PREVIEW
+  DOWNLOAD
+}
+
 model HeroBanner {
   id            Int                 @id @default(autoincrement())
   title         String              @db.VarChar(120)
@@ -97,6 +102,44 @@ model HeroBanner {
   isActive      Boolean             @default(true)
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
+
+  @@index([isActive, sortOrder])
+}
+
+model DownloadCenterItem {
+  id          Int                      @id @default(autoincrement())
+  name        String                   @db.VarChar(200)
+  downloadUrl String                   @db.VarChar(500)
+  actionType  DownloadCenterActionType @default(DOWNLOAD)
+  fileType    String                   @default("文件") @db.VarChar(50)
+  fileSize    String                   @default("1M") @db.VarChar(50)
+  sortOrder   Int                      @default(0)
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+
+  @@index([sortOrder])
+  @@index([fileType])
+  @@index([actionType, sortOrder])
+}
+
+model CompanyProfile {
+  id           Int      @id @default(autoincrement())
+  singletonKey String   @unique @default("default") @db.VarChar(50)
+  phone        String   @default("") @db.VarChar(100)
+  email        String   @default("") @db.VarChar(200)
+  address      String   @default("") @db.VarChar(500)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model FaqItem {
+  id        Int      @id @default(autoincrement())
+  question  String   @db.VarChar(200)
+  answer    String   @db.Text
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([isActive, sortOrder])
 }

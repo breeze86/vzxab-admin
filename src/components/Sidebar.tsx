@@ -2,7 +2,17 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BarChart3, Image, LayoutGrid, LogOut, Mail, MessageSquare } from "lucide-react";
+import {
+  BarChart3,
+  Building2,
+  CircleHelp,
+  Download,
+  Image,
+  LayoutGrid,
+  LogOut,
+  Mail,
+  MessageSquare,
+} from "lucide-react";
 
 const navItems = [
   {
@@ -29,6 +39,24 @@ const navItems = [
     href: "/banners",
     icon: Image,
   },
+  {
+    key: "downloads",
+    label: "下载中心",
+    href: "/downloads",
+    icon: Download,
+  },
+  {
+    key: "company-profile",
+    label: "公司信息",
+    href: "/company-profile",
+    icon: Building2,
+  },
+  {
+    key: "faqs",
+    label: "常见问题",
+    href: "/faqs",
+    icon: CircleHelp,
+  },
 ] as const;
 
 type NavKey = (typeof navItems)[number]["key"];
@@ -37,6 +65,9 @@ const getActiveKey = (pathname: string): NavKey => {
   if (pathname.startsWith("/comments")) return "comments";
   if (pathname.startsWith("/contacts")) return "contacts";
   if (pathname.startsWith("/banners")) return "banners";
+  if (pathname.startsWith("/downloads")) return "downloads";
+  if (pathname.startsWith("/company-profile")) return "company-profile";
+  if (pathname.startsWith("/faqs")) return "faqs";
   return "dashboard";
 };
 
