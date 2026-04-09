@@ -9,13 +9,16 @@ type BannerDbClient = PrismaClient | Prisma.TransactionClient;
 
 export type BannerInput = {
   title: string;
+  titleEn?: string | null;
   summary: string;
+  summaryEn?: string | null;
   mediaType: HeroBannerMediaType;
   videoPlayMode: HeroBannerVideoPlayMode;
   imageUrl: string | null;
   videoUrl: string | null;
   videoPosterUrl: string | null;
   linkUrl: string;
+  linkUrlEn?: string | null;
   sortOrder: number;
   isActive: boolean;
 };
@@ -25,7 +28,9 @@ export type BannerParseResult =
   | { ok: false; message: string };
 
 const MAX_TITLE_LENGTH = 30;
+const MAX_TITLE_EN_LENGTH = 120;
 const MAX_SUMMARY_LENGTH = 200;
+const MAX_SUMMARY_EN_LENGTH = 500;
 const MAX_URL_LENGTH = 500;
 
 const isMediaType = (value: unknown): value is HeroBannerMediaType =>
@@ -47,13 +52,16 @@ const clampPosition = (value: number, max: number) => Math.max(1, Math.min(value
 export const parseBannerPayload = (body: unknown): BannerParseResult => {
   const source = typeof body === "object" && body ? body : {};
   const title = normalizeText((source as Record<string, unknown>).title);
+  const titleEn = normalizeText((source as Record<string, unknown>).titleEn) || null;
   const summary = normalizeText((source as Record<string, unknown>).summary);
+  const summaryEn = normalizeText((source as Record<string, unknown>).summaryEn) || null;
   const mediaType = (source as Record<string, unknown>).mediaType;
   const videoPlayMode = (source as Record<string, unknown>).videoPlayMode;
   const imageUrl = normalizeOptionalUrl((source as Record<string, unknown>).imageUrl);
   const videoUrl = normalizeOptionalUrl((source as Record<string, unknown>).videoUrl);
   const videoPosterUrl = normalizeOptionalUrl((source as Record<string, unknown>).videoPosterUrl);
   const linkUrl = normalizeText((source as Record<string, unknown>).linkUrl);
+  const linkUrlEn = normalizeText((source as Record<string, unknown>).linkUrlEn) || null;
   const sortOrderValue = Number((source as Record<string, unknown>).sortOrder);
   const isActive = Boolean((source as Record<string, unknown>).isActive);
 
@@ -63,11 +71,17 @@ export const parseBannerPayload = (body: unknown): BannerParseResult => {
   if (title.length > MAX_TITLE_LENGTH) {
     return { ok: false, message: `横幅标题不能超过 ${MAX_TITLE_LENGTH} 个字符` };
   }
+  if (titleEn && titleEn.length > MAX_TITLE_EN_LENGTH) {
+    return { ok: false, message: `英文横幅标题不能超过 ${MAX_TITLE_EN_LENGTH} 个字符` };
+  }
   if (!summary) {
     return { ok: false, message: "横幅描述不能为空" };
   }
   if (summary.length > MAX_SUMMARY_LENGTH) {
     return { ok: false, message: `横幅描述不能超过 ${MAX_SUMMARY_LENGTH} 个字符` };
+  }
+  if (summaryEn && summaryEn.length > MAX_SUMMARY_EN_LENGTH) {
+    return { ok: false, message: `英文横幅描述不能超过 ${MAX_SUMMARY_EN_LENGTH} 个字符` };
   }
   if (!isMediaType(mediaType)) {
     return { ok: false, message: "无效的媒体类型" };
@@ -77,6 +91,9 @@ export const parseBannerPayload = (body: unknown): BannerParseResult => {
   }
   if (linkUrl.length > MAX_URL_LENGTH) {
     return { ok: false, message: `跳转链接不能超过 ${MAX_URL_LENGTH} 个字符` };
+  }
+  if (linkUrlEn && linkUrlEn.length > MAX_URL_LENGTH) {
+    return { ok: false, message: `英文跳转链接不能超过 ${MAX_URL_LENGTH} 个字符` };
   }
   if (!Number.isFinite(sortOrderValue) || !Number.isInteger(sortOrderValue) || sortOrderValue < 1) {
     return { ok: false, message: "显示顺序必须是大于 0 的整数" };
@@ -107,7 +124,9 @@ export const parseBannerPayload = (body: unknown): BannerParseResult => {
     ok: true,
     data: {
       title,
+      titleEn,
       summary,
+      summaryEn,
       mediaType,
       videoPlayMode: isVideoPlayMode(videoPlayMode)
         ? videoPlayMode
@@ -116,6 +135,7 @@ export const parseBannerPayload = (body: unknown): BannerParseResult => {
       videoUrl: mediaType === HeroBannerMediaType.VIDEO ? videoUrl : null,
       videoPosterUrl: mediaType === HeroBannerMediaType.VIDEO ? videoPosterUrl : null,
       linkUrl,
+      linkUrlEn,
       sortOrder: sortOrderValue,
       isActive,
     },

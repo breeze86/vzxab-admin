@@ -24,7 +24,9 @@ import {
 type FaqItem = {
   id: number;
   question: string;
+  questionEn: string | null;
   answer: string;
+  answerEn: string | null;
   sortOrder: number;
   isActive: boolean;
   createdAt: string;
@@ -39,7 +41,9 @@ type FaqStats = {
 
 type FaqFormState = {
   question: string;
+  questionEn: string;
   answer: string;
+  answerEn: string;
   sortOrder: number;
   isActive: boolean;
 };
@@ -57,7 +61,9 @@ const emptyStats: FaqStats = {
 
 const buildDefaultFormState = (sortOrder: number): FaqFormState => ({
   question: "",
+  questionEn: "",
   answer: "",
+  answerEn: "",
   sortOrder,
   isActive: true,
 });
@@ -239,7 +245,9 @@ export default function FaqsPage() {
     setEditingItem(item);
     setForm({
       question: item.question,
+      questionEn: item.questionEn ?? "",
       answer: item.answer,
+      answerEn: item.answerEn ?? "",
       sortOrder: item.sortOrder,
       isActive: item.isActive,
     });
@@ -765,7 +773,7 @@ export default function FaqsPage() {
             <div className="mt-6 grid grid-cols-2 gap-4">
               <label className="flex flex-col gap-2 text-[14px] text-[#364153]">
                 <span className="flex items-center justify-between gap-4">
-                  <span>问题标题</span>
+                  <span>问题标题（中文）</span>
                   <span
                     className={`text-[12px] ${
                       isQuestionOverflow ? "text-[#e7000b]" : "text-[#6a7282]"
@@ -783,20 +791,24 @@ export default function FaqsPage() {
               </label>
 
               <label className="flex flex-col gap-2 text-[14px] text-[#364153]">
-                <span>显示顺序</span>
+                <span className="flex items-center justify-between gap-4">
+                  <span>问题标题（英文）</span>
+                  <span className="text-[12px] text-[#6a7282]">
+                    {Array.from(form.questionEn).length}/{MAX_QUESTION_LENGTH}
+                  </span>
+                </span>
                 <input
                   className="h-11 rounded-[10px] border border-[#e5e7eb] px-4 text-[14px] text-[#101828] outline-none focus:border-[#93c5fd]"
-                  type="number"
-                  min={1}
-                  max={maxSortOrder}
-                  value={form.sortOrder}
-                  onChange={(event) => updateForm("sortOrder", Number(event.target.value) || 1)}
+                  maxLength={MAX_QUESTION_LENGTH}
+                  value={form.questionEn}
+                  onChange={(event) => updateForm("questionEn", event.target.value)}
+                  placeholder="可选"
                 />
               </label>
 
               <label className="col-span-2 flex flex-col gap-2 text-[14px] text-[#364153]">
                 <span className="flex items-center justify-between gap-4">
-                  <span>回答内容</span>
+                  <span>回答内容（中文）</span>
                   <span
                     className={`text-[12px] ${
                       isAnswerOverflow ? "text-[#e7000b]" : "text-[#6a7282]"
@@ -806,9 +818,36 @@ export default function FaqsPage() {
                   </span>
                 </span>
                 <textarea
-                  className="h-40 rounded-[10px] border border-[#e5e7eb] px-4 py-3 text-[14px] text-[#101828] outline-none focus:border-[#93c5fd]"
+                  className="h-32 rounded-[10px] border border-[#e5e7eb] px-4 py-3 text-[14px] text-[#101828] outline-none focus:border-[#93c5fd]"
                   value={form.answer}
                   onChange={(event) => updateForm("answer", event.target.value)}
+                />
+              </label>
+
+              <label className="col-span-2 flex flex-col gap-2 text-[14px] text-[#364153]">
+                <span className="flex items-center justify-between gap-4">
+                  <span>回答内容（英文）</span>
+                  <span className="text-[12px] text-[#6a7282]">
+                    {Array.from(form.answerEn).length}/{MAX_ANSWER_LENGTH}
+                  </span>
+                </span>
+                <textarea
+                  className="h-32 rounded-[10px] border border-[#e5e7eb] px-4 py-3 text-[14px] text-[#101828] outline-none focus:border-[#93c5fd]"
+                  value={form.answerEn}
+                  onChange={(event) => updateForm("answerEn", event.target.value)}
+                  placeholder="可选，用于英文版网站"
+                />
+              </label>
+
+              <label className="flex flex-col gap-2 text-[14px] text-[#364153]">
+                <span>显示顺序</span>
+                <input
+                  className="h-11 rounded-[10px] border border-[#e5e7eb] px-4 text-[14px] text-[#101828] outline-none focus:border-[#93c5fd]"
+                  type="number"
+                  min={1}
+                  max={maxSortOrder}
+                  value={form.sortOrder}
+                  onChange={(event) => updateForm("sortOrder", Number(event.target.value) || 1)}
                 />
               </label>
 

@@ -2,6 +2,7 @@ export type CompanyProfileInput = {
   phone: string;
   email: string;
   address: string;
+  addressEn?: string | null;
 };
 
 export type CompanyProfileParseResult =
@@ -13,6 +14,7 @@ export const COMPANY_PROFILE_SINGLETON_KEY = "default";
 const MAX_PHONE_LENGTH = 100;
 const MAX_EMAIL_LENGTH = 200;
 const MAX_ADDRESS_LENGTH = 500;
+const MAX_ADDRESS_EN_LENGTH = 500;
 
 const normalizeText = (value: unknown) =>
   typeof value === "string" ? value.trim() : "";
@@ -24,6 +26,7 @@ export const parseCompanyProfilePayload = (body: unknown): CompanyProfileParseRe
   const phone = normalizeText((source as Record<string, unknown>).phone);
   const email = normalizeText((source as Record<string, unknown>).email);
   const address = normalizeText((source as Record<string, unknown>).address);
+  const addressEn = normalizeText((source as Record<string, unknown>).addressEn) || null;
 
   if (phone.length > MAX_PHONE_LENGTH) {
     return { ok: false, message: `公司电话不能超过 ${MAX_PHONE_LENGTH} 个字符` };
@@ -37,6 +40,9 @@ export const parseCompanyProfilePayload = (body: unknown): CompanyProfileParseRe
   if (address.length > MAX_ADDRESS_LENGTH) {
     return { ok: false, message: `公司地址不能超过 ${MAX_ADDRESS_LENGTH} 个字符` };
   }
+  if (addressEn && addressEn.length > MAX_ADDRESS_EN_LENGTH) {
+    return { ok: false, message: `英文公司地址不能超过 ${MAX_ADDRESS_EN_LENGTH} 个字符` };
+  }
 
   return {
     ok: true,
@@ -44,6 +50,7 @@ export const parseCompanyProfilePayload = (body: unknown): CompanyProfileParseRe
       phone,
       email,
       address,
+      addressEn,
     },
   };
 };
@@ -52,4 +59,5 @@ export const emptyCompanyProfile = {
   phone: "",
   email: "",
   address: "",
+  addressEn: "",
 };

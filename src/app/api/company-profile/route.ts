@@ -24,6 +24,7 @@ export async function GET(request: Request) {
             phone: profile.phone,
             email: profile.email,
             address: profile.address,
+            addressEn: (profile as { addressEn?: string }).addressEn,
             updatedAt: profile.updatedAt,
           }
         : {
@@ -64,6 +65,7 @@ export async function PATCH(request: Request) {
         phone: profile.phone,
         email: profile.email,
         address: profile.address,
+        addressEn: (profile as { addressEn?: string }).addressEn,
         updatedAt: profile.updatedAt,
       },
     });

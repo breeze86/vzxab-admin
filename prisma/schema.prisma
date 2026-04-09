@@ -91,13 +91,16 @@ enum DownloadCenterActionType {
 model HeroBanner {
   id            Int                 @id @default(autoincrement())
   title         String              @db.VarChar(120)
+  titleEn       String?             @db.VarChar(120)
   summary       String              @db.VarChar(500)
+  summaryEn     String?             @db.VarChar(500)
   mediaType     HeroBannerMediaType
   videoPlayMode HeroBannerVideoPlayMode @default(HOVER)
   imageUrl      String?             @db.VarChar(500)
   videoUrl      String?             @db.VarChar(500)
   videoPosterUrl String?            @db.VarChar(500)
   linkUrl       String              @db.VarChar(500)
+  linkUrlEn     String?             @db.VarChar(500)
   sortOrder     Int                 @default(0)
   isActive      Boolean             @default(true)
   createdAt     DateTime            @default(now())
@@ -107,15 +110,17 @@ model HeroBanner {
 }
 
 model DownloadCenterItem {
-  id          Int                      @id @default(autoincrement())
-  name        String                   @db.VarChar(200)
-  downloadUrl String                   @db.VarChar(500)
-  actionType  DownloadCenterActionType @default(DOWNLOAD)
-  fileType    String                   @default("文件") @db.VarChar(50)
-  fileSize    String                   @default("1M") @db.VarChar(50)
-  sortOrder   Int                      @default(0)
-  createdAt   DateTime                 @default(now())
-  updatedAt   DateTime                 @updatedAt
+  id            Int                      @id @default(autoincrement())
+  name          String                   @db.VarChar(200)
+  nameEn        String?                  @db.VarChar(200)
+  downloadUrl   String                   @db.VarChar(500)
+  downloadUrlEn String?                  @db.VarChar(500)
+  actionType    DownloadCenterActionType @default(DOWNLOAD)
+  fileType      String                   @default("文件") @db.VarChar(50)
+  fileSize      String                   @default("1M") @db.VarChar(50)
+  sortOrder     Int                      @default(0)
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
 
   @@index([sortOrder])
   @@index([fileType])
@@ -128,18 +133,21 @@ model CompanyProfile {
   phone        String   @default("") @db.VarChar(100)
   email        String   @default("") @db.VarChar(200)
   address      String   @default("") @db.VarChar(500)
+  addressEn    String?  @db.VarChar(500)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
 
 model FaqItem {
-  id        Int      @id @default(autoincrement())
-  question  String   @db.VarChar(200)
-  answer    String   @db.Text
-  sortOrder Int      @default(0)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         Int      @id @default(autoincrement())
+  question   String   @db.VarChar(200)
+  questionEn String?  @db.VarChar(200)
+  answer     String   @db.Text
+  answerEn   String?  @db.Text
+  sortOrder  Int      @default(0)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@index([isActive, sortOrder])
 }

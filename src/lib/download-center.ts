@@ -4,7 +4,9 @@ type DownloadDbClient = PrismaClient | Prisma.TransactionClient;
 
 export type DownloadCenterInput = {
   name: string;
+  nameEn?: string | null;
   downloadUrl: string;
+  downloadUrlEn?: string | null;
   actionType: DownloadCenterActionType;
   fileType: string;
   fileSize: string;
@@ -30,6 +32,7 @@ const DEFAULT_FILE_TYPE = "文件";
 const DEFAULT_FILE_SIZE = "1M";
 const DEFAULT_ACTION_TYPE = DownloadCenterActionType.DOWNLOAD;
 const MAX_NAME_LENGTH = 200;
+const MAX_NAME_EN_LENGTH = 200;
 const MAX_URL_LENGTH = 500;
 const MAX_FILE_META_LENGTH = 50;
 const REQUEST_TIMEOUT_MS = 8000;
@@ -275,7 +278,9 @@ export const detectDownloadMetadata = async (
 export const parseDownloadCenterPayload = (body: unknown): DownloadCenterParseResult => {
   const source = typeof body === "object" && body ? body : {};
   const name = normalizeText((source as Record<string, unknown>).name);
+  const nameEn = normalizeText((source as Record<string, unknown>).nameEn) || null;
   const downloadUrl = normalizeText((source as Record<string, unknown>).downloadUrl);
+  const downloadUrlEn = normalizeText((source as Record<string, unknown>).downloadUrlEn) || null;
   const actionType = normalizeActionType((source as Record<string, unknown>).actionType);
   const fileType = normalizeFileType((source as Record<string, unknown>).fileType);
   const fileSize = normalizeFileSize((source as Record<string, unknown>).fileSize);
@@ -287,6 +292,9 @@ export const parseDownloadCenterPayload = (body: unknown): DownloadCenterParseRe
   if (name.length > MAX_NAME_LENGTH) {
     return { ok: false, message: `文档名称不能超过 ${MAX_NAME_LENGTH} 个字符` };
   }
+  if (nameEn && nameEn.length > MAX_NAME_EN_LENGTH) {
+    return { ok: false, message: `英文文档名称不能超过 ${MAX_NAME_EN_LENGTH} 个字符` };
+  }
   if (!downloadUrl) {
     return { ok: false, message: "下载链接不能为空" };
   }
@@ -295,6 +303,14 @@ export const parseDownloadCenterPayload = (body: unknown): DownloadCenterParseRe
   }
   if (!isHttpUrl(downloadUrl)) {
     return { ok: false, message: "下载链接必须是 http 或 https 地址" };
+  }
+  if (downloadUrlEn) {
+    if (downloadUrlEn.length > MAX_URL_LENGTH) {
+      return { ok: false, message: `英文下载链接不能超过 ${MAX_URL_LENGTH} 个字符` };
+    }
+    if (!isHttpUrl(downloadUrlEn)) {
+      return { ok: false, message: "英文下载链接必须是 http 或 https 地址" };
+    }
   }
   if (fileType.length > MAX_FILE_META_LENGTH) {
     return { ok: false, message: `文档类型不能超过 ${MAX_FILE_META_LENGTH} 个字符` };
@@ -310,7 +326,9 @@ export const parseDownloadCenterPayload = (body: unknown): DownloadCenterParseRe
     ok: true,
     data: {
       name,
+      nameEn,
       downloadUrl,
+      downloadUrlEn,
       actionType,
       fileType,
       fileSize,

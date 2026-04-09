@@ -27,13 +27,16 @@ type BannerVideoPlayMode = "HOVER" | "AUTO";
 type BannerItem = {
   id: number;
   title: string;
+  titleEn: string | null;
   summary: string;
+  summaryEn: string | null;
   mediaType: BannerMediaType;
   videoPlayMode: BannerVideoPlayMode;
   imageUrl: string | null;
   videoUrl: string | null;
   videoPosterUrl: string | null;
   linkUrl: string;
+  linkUrlEn: string | null;
   sortOrder: number;
   isActive: boolean;
   createdAt: string;
@@ -48,13 +51,16 @@ type BannerStats = {
 
 type BannerFormState = {
   title: string;
+  titleEn: string;
   summary: string;
+  summaryEn: string;
   mediaType: BannerMediaType;
   videoPlayMode: BannerVideoPlayMode;
   imageUrl: string;
   videoUrl: string;
   videoPosterUrl: string;
   linkUrl: string;
+  linkUrlEn: string;
   sortOrder: number;
   isActive: boolean;
 };
@@ -72,13 +78,16 @@ const MAX_SUMMARY_LENGTH = 200;
 
 const buildDefaultFormState = (sortOrder: number): BannerFormState => ({
   title: "",
+  titleEn: "",
   summary: "",
+  summaryEn: "",
   mediaType: "IMAGE",
   videoPlayMode: "HOVER",
   imageUrl: "",
   videoUrl: "",
   videoPosterUrl: "",
   linkUrl: "",
+  linkUrlEn: "",
   sortOrder,
   isActive: true,
 });
@@ -318,13 +327,16 @@ export default function BannersPage() {
     setEditingBanner(banner);
     setForm({
       title: banner.title,
+      titleEn: banner.titleEn ?? "",
       summary: banner.summary,
+      summaryEn: banner.summaryEn ?? "",
       mediaType: banner.mediaType,
       videoPlayMode: banner.videoPlayMode,
       imageUrl: banner.imageUrl || "",
       videoUrl: banner.videoUrl || "",
       videoPosterUrl: banner.videoPosterUrl || "",
       linkUrl: banner.linkUrl,
+      linkUrlEn: banner.linkUrlEn ?? "",
       sortOrder: banner.sortOrder,
       isActive: banner.isActive,
     });
@@ -970,7 +982,7 @@ export default function BannersPage() {
             <div className="mt-6 grid grid-cols-2 gap-4">
               <label className="flex flex-col gap-2 text-[14px] text-[#364153]">
                 <span className="flex items-center justify-between gap-4">
-                  <span>横幅标题</span>
+                  <span>横幅标题（中文）</span>
                   <span
                     className={`text-[12px] ${
                       isTitleOverflow ? "text-[#e7000b]" : "text-[#6a7282]"
@@ -988,20 +1000,24 @@ export default function BannersPage() {
               </label>
 
               <label className="flex flex-col gap-2 text-[14px] text-[#364153]">
-                <span>显示顺序</span>
+                <span className="flex items-center justify-between gap-4">
+                  <span>横幅标题（英文）</span>
+                  <span className="text-[12px] text-[#6a7282]">
+                    {Array.from(form.titleEn).length}/{MAX_TITLE_LENGTH}
+                  </span>
+                </span>
                 <input
                   className="h-11 rounded-[10px] border border-[#e5e7eb] px-4 text-[14px] text-[#101828] outline-none focus:border-[#93c5fd]"
-                  type="number"
-                  min={1}
-                  max={maxSortOrder}
-                  value={form.sortOrder}
-                  onChange={(event) => updateForm("sortOrder", Number(event.target.value) || 1)}
+                  maxLength={MAX_TITLE_LENGTH}
+                  value={form.titleEn}
+                  onChange={(event) => updateForm("titleEn", event.target.value)}
+                  placeholder="可选"
                 />
               </label>
 
               <label className="col-span-2 flex flex-col gap-2 text-[14px] text-[#364153]">
                 <span className="flex items-center justify-between gap-4">
-                  <span>横幅描述</span>
+                  <span>横幅描述（中文）</span>
                   <span
                     className={`text-[12px] ${
                       isSummaryOverflow ? "text-[#e7000b]" : "text-[#6a7282]"
@@ -1011,9 +1027,36 @@ export default function BannersPage() {
                   </span>
                 </span>
                 <textarea
-                  className="h-28 rounded-[10px] border border-[#e5e7eb] px-4 py-3 text-[14px] text-[#101828] outline-none focus:border-[#93c5fd]"
+                  className="h-24 rounded-[10px] border border-[#e5e7eb] px-4 py-3 text-[14px] text-[#101828] outline-none focus:border-[#93c5fd]"
                   value={form.summary}
                   onChange={(event) => updateForm("summary", event.target.value)}
+                />
+              </label>
+
+              <label className="col-span-2 flex flex-col gap-2 text-[14px] text-[#364153]">
+                <span className="flex items-center justify-between gap-4">
+                  <span>横幅描述（英文）</span>
+                  <span className="text-[12px] text-[#6a7282]">
+                    {Array.from(form.summaryEn).length}/{MAX_SUMMARY_LENGTH}
+                  </span>
+                </span>
+                <textarea
+                  className="h-24 rounded-[10px] border border-[#e5e7eb] px-4 py-3 text-[14px] text-[#101828] outline-none focus:border-[#93c5fd]"
+                  value={form.summaryEn}
+                  onChange={(event) => updateForm("summaryEn", event.target.value)}
+                  placeholder="可选，用于英文版网站"
+                />
+              </label>
+
+              <label className="flex flex-col gap-2 text-[14px] text-[#364153]">
+                <span>显示顺序</span>
+                <input
+                  className="h-11 rounded-[10px] border border-[#e5e7eb] px-4 text-[14px] text-[#101828] outline-none focus:border-[#93c5fd]"
+                  type="number"
+                  min={1}
+                  max={maxSortOrder}
+                  value={form.sortOrder}
+                  onChange={(event) => updateForm("sortOrder", Number(event.target.value) || 1)}
                 />
               </label>
 
@@ -1085,11 +1128,21 @@ export default function BannersPage() {
               )}
 
               <label className="col-span-2 flex flex-col gap-2 text-[14px] text-[#364153]">
-                <span>跳转链接</span>
+                <span>跳转链接（中文）</span>
                 <input
                   className="h-11 rounded-[10px] border border-[#e5e7eb] px-4 text-[14px] text-[#101828] outline-none focus:border-[#93c5fd]"
                   value={form.linkUrl}
                   onChange={(event) => updateForm("linkUrl", event.target.value)}
+                />
+              </label>
+
+              <label className="col-span-2 flex flex-col gap-2 text-[14px] text-[#364153]">
+                <span>跳转链接（英文）</span>
+                <input
+                  className="h-11 rounded-[10px] border border-[#e5e7eb] px-4 text-[14px] text-[#101828] outline-none focus:border-[#93c5fd]"
+                  value={form.linkUrlEn}
+                  onChange={(event) => updateForm("linkUrlEn", event.target.value)}
+                  placeholder="可选，用于英文版网站"
                 />
               </label>
             </div>

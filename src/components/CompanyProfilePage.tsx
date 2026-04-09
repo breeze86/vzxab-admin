@@ -8,6 +8,7 @@ type CompanyProfile = {
   phone: string;
   email: string;
   address: string;
+  addressEn: string;
   updatedAt: string | null;
 };
 
@@ -15,6 +16,7 @@ const emptyProfile: CompanyProfile = {
   phone: "",
   email: "",
   address: "",
+  addressEn: "",
   updatedAt: null,
 };
 
@@ -101,6 +103,7 @@ export default function CompanyProfilePage() {
           phone: form.phone,
           email: form.email,
           address: form.address,
+          addressEn: form.addressEn,
         }),
       });
 
@@ -205,13 +208,26 @@ export default function CompanyProfilePage() {
                 <label className="col-span-2 flex flex-col gap-2 text-[14px] text-[#364153]">
                   <span className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-[#155dfc]" strokeWidth={1.8} />
-                    公司地址
+                    公司地址（中文）
                   </span>
                   <textarea
-                    className="h-32 rounded-[10px] border border-[#e5e7eb] px-4 py-3 text-[14px] text-[#101828] outline-none focus:border-[#93c5fd]"
+                    className="h-24 rounded-[10px] border border-[#e5e7eb] px-4 py-3 text-[14px] text-[#101828] outline-none focus:border-[#93c5fd]"
                     value={form.address}
                     onChange={(event) => updateField("address", event.target.value)}
                     placeholder="请输入公司地址"
+                  />
+                </label>
+
+                <label className="col-span-2 flex flex-col gap-2 text-[14px] text-[#364153]">
+                  <span className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-[#155dfc]" strokeWidth={1.8} />
+                    公司地址（英文）
+                  </span>
+                  <textarea
+                    className="h-24 rounded-[10px] border border-[#e5e7eb] px-4 py-3 text-[14px] text-[#101828] outline-none focus:border-[#93c5fd]"
+                    value={form.addressEn}
+                    onChange={(event) => updateField("addressEn", event.target.value)}
+                    placeholder="可选，用于英文版网站"
                   />
                 </label>
               </div>

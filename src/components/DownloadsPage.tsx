@@ -27,7 +27,9 @@ import {
 type DownloadItem = {
   id: number;
   name: string;
+  nameEn: string | null;
   downloadUrl: string;
+  downloadUrlEn: string | null;
   actionType: DownloadActionType;
   fileType: string;
   fileSize: string;
@@ -43,7 +45,9 @@ type DownloadStats = {
 
 type DownloadFormState = {
   name: string;
+  nameEn: string;
   downloadUrl: string;
+  downloadUrlEn: string;
   actionType: DownloadActionType;
   fileType: string;
   fileSize: string;
@@ -68,7 +72,9 @@ const emptyStats: DownloadStats = {
 
 const buildDefaultFormState = (sortOrder: number): DownloadFormState => ({
   name: "",
+  nameEn: "",
   downloadUrl: "",
+  downloadUrlEn: "",
   actionType: DEFAULT_ACTION_TYPE,
   fileType: DEFAULT_FILE_TYPE,
   fileSize: DEFAULT_FILE_SIZE,
@@ -325,7 +331,9 @@ export default function DownloadsPage() {
     setEditingItem(item);
     setForm({
       name: item.name,
+      nameEn: item.nameEn ?? "",
       downloadUrl: item.downloadUrl,
+      downloadUrlEn: item.downloadUrlEn ?? "",
       actionType: item.actionType,
       fileType: item.fileType,
       fileSize: item.fileSize,
@@ -911,7 +919,7 @@ export default function DownloadsPage() {
             <div className="mt-6 grid grid-cols-2 gap-4">
               <label className="flex flex-col gap-2 text-[14px] text-[#364153]">
                 <span className="flex items-center justify-between gap-4">
-                  <span>文档名称</span>
+                  <span>文档名称（中文）</span>
                   <span
                     className={`text-[12px] ${
                       isNameOverflow ? "text-[#e7000b]" : "text-[#6a7282]"
@@ -929,20 +937,24 @@ export default function DownloadsPage() {
               </label>
 
               <label className="flex flex-col gap-2 text-[14px] text-[#364153]">
-                <span>显示顺序</span>
+                <span className="flex items-center justify-between gap-4">
+                  <span>文档名称（英文）</span>
+                  <span className="text-[12px] text-[#6a7282]">
+                    {Array.from(form.nameEn).length}/{MAX_NAME_LENGTH}
+                  </span>
+                </span>
                 <input
                   className="h-11 rounded-[10px] border border-[#e5e7eb] px-4 text-[14px] text-[#101828] outline-none focus:border-[#93c5fd]"
-                  type="number"
-                  min={1}
-                  max={maxSortOrder}
-                  value={form.sortOrder}
-                  onChange={(event) => updateForm("sortOrder", Number(event.target.value) || 1)}
+                  maxLength={MAX_NAME_LENGTH}
+                  value={form.nameEn}
+                  onChange={(event) => updateForm("nameEn", event.target.value)}
+                  placeholder="可选"
                 />
               </label>
 
               <label className="col-span-2 flex flex-col gap-2 text-[14px] text-[#364153]">
                 <span className="flex items-center justify-between gap-4">
-                  <span>下载链接</span>
+                  <span>下载链接（中文）</span>
                   <button
                     className="inline-flex h-8 items-center gap-1 rounded-[8px] border border-[#dbe1ea] bg-white px-3 text-[12px] text-[#155dfc] hover:bg-[#eff6ff] disabled:cursor-not-allowed disabled:opacity-60"
                     type="button"
@@ -962,6 +974,28 @@ export default function DownloadsPage() {
                   value={form.downloadUrl}
                   onChange={(event) => updateForm("downloadUrl", event.target.value)}
                   onBlur={() => void detectMetadata(false)}
+                />
+              </label>
+
+              <label className="col-span-2 flex flex-col gap-2 text-[14px] text-[#364153]">
+                <span>下载链接（英文）</span>
+                <input
+                  className="h-11 rounded-[10px] border border-[#e5e7eb] px-4 text-[14px] text-[#101828] outline-none focus:border-[#93c5fd]"
+                  value={form.downloadUrlEn}
+                  onChange={(event) => updateForm("downloadUrlEn", event.target.value)}
+                  placeholder="可选，用于英文版网站"
+                />
+              </label>
+
+              <label className="flex flex-col gap-2 text-[14px] text-[#364153]">
+                <span>显示顺序</span>
+                <input
+                  className="h-11 rounded-[10px] border border-[#e5e7eb] px-4 text-[14px] text-[#101828] outline-none focus:border-[#93c5fd]"
+                  type="number"
+                  min={1}
+                  max={maxSortOrder}
+                  value={form.sortOrder}
+                  onChange={(event) => updateForm("sortOrder", Number(event.target.value) || 1)}
                 />
               </label>
 
