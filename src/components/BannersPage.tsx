@@ -73,7 +73,7 @@ const emptyStats: BannerStats = {
   inactiveCount: 0,
 };
 
-const MAX_TITLE_LENGTH = 30;
+const MAX_TITLE_LENGTH = 200;
 const MAX_SUMMARY_LENGTH = 200;
 
 const buildDefaultFormState = (sortOrder: number): BannerFormState => ({

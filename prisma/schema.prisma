@@ -90,8 +90,8 @@ enum DownloadCenterActionType {
 
 model HeroBanner {
   id            Int                 @id @default(autoincrement())
-  title         String              @db.VarChar(120)
-  titleEn       String?             @db.VarChar(120)
+  title         String              @db.VarChar(200)
+  titleEn       String?             @db.VarChar(200)
   summary       String              @db.VarChar(500)
   summaryEn     String?             @db.VarChar(500)
   mediaType     HeroBannerMediaType

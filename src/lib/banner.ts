@@ -27,8 +27,8 @@ export type BannerParseResult =
   | { ok: true; data: BannerInput }
   | { ok: false; message: string };
 
-const MAX_TITLE_LENGTH = 30;
-const MAX_TITLE_EN_LENGTH = 120;
+const MAX_TITLE_LENGTH = 200;
+const MAX_TITLE_EN_LENGTH = 200;
 const MAX_SUMMARY_LENGTH = 200;
 const MAX_SUMMARY_EN_LENGTH = 500;
 const MAX_URL_LENGTH = 500;
