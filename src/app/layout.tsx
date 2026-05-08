@@ -25,9 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
-      <body className={`${inter.variable} ${notoSansSc.variable} font-sans`}>
-        {children}
-      </body>
+      <body className={`${inter.variable} ${notoSansSc.variable} font-sans`}>{children}</body>
     </html>
   );
 }

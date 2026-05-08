@@ -9,7 +9,9 @@ export default function DashboardLayout({
     <div className="bg-white">
       <div className="flex h-screen w-full min-h-0 overflow-hidden bg-[#f9fafb]">
         <Sidebar />
-        <main className="relative flex flex-1 min-w-0 min-h-0 overflow-y-auto">{children}</main>
+        <main className="relative flex min-h-0 min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full">{children}</div>
+        </main>
       </div>
     </div>
   );
