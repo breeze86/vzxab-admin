@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { sha256 } from "js-sha256";
 import { Eye, LayoutGrid, Lock, Mail } from "lucide-react";
-import IcpRecord from "@/components/IcpRecord";
 
 const AUTH_TOKEN_KEY = "auth_token";
 
@@ -179,10 +178,8 @@ export default function LoginPage() {
             </form>
           </div>
 
-          <div className="flex w-full flex-nowrap items-center justify-center gap-2 text-center text-sm leading-5 tracking-[-0.1504px] text-[#6a7282]">
-            <span className="leading-5">© 2025 管理面板. 保留所有权利</span>
-            <span className="leading-5">·</span>
-            <IcpRecord className="leading-5" linkClassName="text-sm leading-5 tracking-[-0.1504px]" />
+          <div className="w-full text-center text-sm tracking-[-0.1504px] text-[#6a7282]">
+            © 2025 管理面板. 保留所有权利
           </div>
         </div>
       </div>
